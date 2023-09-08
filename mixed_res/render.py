@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw
 from torch import FloatTensor, LongTensor, Tensor
 from torchvision.transforms.functional import to_pil_image
 
+from mixed_res.quadtree_impl.utils import split_model_inputs
+
 
 def render_quadtree(image: Union[FloatTensor, Image.Image], model_inputs: FloatTensor,
                     blur: bool = True, show_lines: bool = True, mini_patches: bool = False,
@@ -16,7 +18,7 @@ def render_quadtree(image: Union[FloatTensor, Image.Image], model_inputs: FloatT
     if isinstance(image, Tensor):
         image = tensor_to_pil_image(image)
 
-    boxes, (min_patch_size) = _extract_boxes_from_model_inputs(model_inputs)
+    boxes, min_patch_size = _extract_boxes_from_model_inputs(model_inputs)
 
     vis = Image.new('RGB', (image.width, image.height), (255, 255, 255))
     draw = ImageDraw.Draw(vis, "RGBA")
@@ -35,7 +37,7 @@ def render_quadtree(image: Union[FloatTensor, Image.Image], model_inputs: FloatT
             vis.paste(patch, (l, t))
         else:
             vis.paste(patch, ((l + r - patch.width) //
-                      2, (t + b - patch.height) // 2))
+                              2, (t + b - patch.height) // 2))
 
         if show_lines:
             border_points = ((r - 1, t), (r - 1, b - 1), (l, b - 1))
@@ -49,16 +51,13 @@ def render_quadtree(image: Union[FloatTensor, Image.Image], model_inputs: FloatT
 
 
 def _extract_boxes_from_model_inputs(model_inputs: FloatTensor) -> tuple[LongTensor, int]:
-    flat_patches, centers, size_id = model_inputs[:, :
-                                                  -3], model_inputs[:, -3:
-                                                                    -1], model_inputs[:,
-                                                                                      -1:]
+    flat_patches, centers, size_ids = split_model_inputs(model_inputs)
     min_patch_size = int(math.sqrt(flat_patches.shape[1] / 3))
     is_floored_centers = ((centers % 1) == 0).all()
     if is_floored_centers:
-        centers = torch.where(size_id != 0, centers, centers + 0.5)
+        centers = torch.where(size_ids != 0, centers, centers + 0.5)
     centers = centers * min_patch_size
-    patch_sizes = min_patch_size * (2**size_id)
+    patch_sizes = min_patch_size * (2 ** size_ids)
     boxes = torch.cat([centers - patch_sizes / 2, centers + patch_sizes / 2],
                       dim=1).long()
     return boxes, min_patch_size

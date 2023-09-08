@@ -105,10 +105,10 @@ def grid_boxes_tensor(patch_size: int, full_size: int, device: torch.device, dty
 
 
 def patch_arange(min_patch_size: int, max_patch_size: int) -> Tensor:
-    min_logsize = torch.log2(torch.tensor(min_patch_size)).long()
-    max_logsize = torch.log2(torch.tensor(max_patch_size)).long()
-    patch_arange = torch.tensor(1) << torch.arange(
-        min_logsize, max_logsize + 1)  # equivalent to 2 ** arange
+    min_logsize = torch.log2(torch.tensor(min_patch_size))
+    max_logsize = torch.log2(torch.tensor(max_patch_size))
+    patch_arange = 2 ** torch.arange(min_logsize, max_logsize + 1)
+    patch_arange = patch_arange.round().long()
     return patch_arange
 
 
@@ -123,3 +123,10 @@ def sort_by_meta(quadtree_output):
 
 def is_power_of_2(x: int) -> bool:
     return math.log2(x) % 1 == 0
+
+
+def split_model_inputs(model_inputs: Tensor) -> tuple[Tensor, Tensor, Tensor]:
+    flat_patches, centers, size_ids = (model_inputs[..., :-3],
+                                       model_inputs[..., -3:-1],
+                                       model_inputs[..., -1:])
+    return flat_patches, centers, size_ids

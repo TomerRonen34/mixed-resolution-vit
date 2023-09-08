@@ -1,5 +1,7 @@
+<base target="_blank">
+
 # Vision Transformers with Mixed-Resolution Tokenization
-Official repo for https://arxiv.org/abs/2304.00287 (published in CVPRW 2023).
+Official repo for https://arxiv.org/abs/2304.00287 (CVPRW 2023 oral).
 
 ![The Quadformer](quadformer.jpg)
 
@@ -9,12 +11,8 @@ Official repo for https://arxiv.org/abs/2304.00287 (published in CVPRW 2023).
 
 Let me know if you're also interested in the Grad-CAM oracle code, or training code for reproducing the experiments in the paper (based on the timm library).
 
-</br>
-
 ## Setup
 Install torch and torchvision, e.g. by following the [official instructions](https://pytorch.org/get-started/locally/).
-
-</br>
 
 ## Examples
 See notebooks under `examples/`:
@@ -31,6 +29,11 @@ based on patch locations, and prepend the cls_token.
 We provide 3 different Quadtree implementations. \
 This notebook shows that they produce identical results, and compares runtime.
 
+* **04_reverse_quadtree.ipynb** \
+Usage example for Quadtree reversal (not featured in the paper). This operation turns the results of the Quadtree algorithm into a full-size feature volume, effectively replicating the token embedding of each Quadtree token to match its original patch size. \
+This can be useful when you want to apply Quadtree-style processing (e.g. with a mixed-resolution ViT or an MLP) followed by a more standard model (like a CNN).
+
+
 ## Patch scorers
 We provide implementations for several patch scorers:
 
@@ -41,8 +44,6 @@ We provide implementations for several patch scorers:
 * **PrecomputedPatchScorer:** useful for running Quadtrees with precomputed patch scores. We use it to visualize the tokenizations induced by our Grad-CAM oracle patch scorer, used for analysis in the paper.
 
 * **RandomPatchScorer:** fast and useful for sanity checks. Supports seeding.
-
-</br>
 
 ## Quadtree implementations
 We provide 3 different GPU-friendly implementations of the Saliency-Based Quadtree algorithm. They produce identical results. They share the same batchified code for image patchifying and patch scoring, and differ in their implementation of the patch-splitting logic.

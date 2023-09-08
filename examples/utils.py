@@ -15,7 +15,10 @@ def transforms_imagenet_eval(
         interpolation=transforms.InterpolationMode.BILINEAR,
         mean=IMAGENET_DEFAULT_MEAN,
         std=IMAGENET_DEFAULT_STD):
-    """ Adapted from the timm library """
+    """
+    Based on the implementation in timm:
+    https://github.com/huggingface/pytorch-image-models/blob/20a1fa63f8ea999dab29d927d5e1866ed3b67348/timm/data/transforms_factory.py#L130
+    """
 
     if isinstance(img_size, (tuple, list)):
         assert len(img_size) == 2

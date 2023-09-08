@@ -7,10 +7,8 @@ from torch import nn
 def build_sinusoidal_embeddings(positions: torch.Tensor,
                                 embedding_dim: int) -> torch.FloatTensor:
     """
-    Adapted from fairseq.
-    Build sinusoidal embeddings.
-    This matches the implementation in tensor2tensor, but differs slightly
-    from the description in Section 3.5 of "Attention Is All You Need".
+    Based on the implementation in fairseq:
+    https://github.com/facebookresearch/fairseq/blob/5ecbbf58d6e80b917340bcbf9d7bdbb539f0f92b/fairseq/modules/sinusoidal_positional_embedding.py#L36
     """
     assert positions.ndim == 2  # [batch, position]
     half_dim = embedding_dim // 2
